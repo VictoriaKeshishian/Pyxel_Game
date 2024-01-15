@@ -22,6 +22,7 @@ class Game:
         self.text_visible = False
         self.text_display_time = 1  # количество кадров (фреймов), в течение которых будет отображаться текст
         self.current_text_frame = 0
+        self.score = 0
 
         pyxel.init(self.WINDOW_W, self.WINDOW_H)
         pyxel.load("my.pyxres")
@@ -48,6 +49,8 @@ class Game:
 
 
     def update(self):
+
+        pyxel.text(10, 10, f"Score: {self.score}", 10)
 
         # Обработка выхода из игры при нажатии Q
         if pyxel.btnp(pyxel.KEY_Q):
@@ -90,6 +93,12 @@ class Game:
                     enemy.pos.y += enemy.speed_y
                 enemy.update(enemy.pos.x, enemy.pos.y)
 
+            # Проверка столкновения с другими врагами
+            for other_enemy in self.Enemies:
+                if enemy != other_enemy and self.check_collision(enemy, other_enemy):
+                    # Если есть столкновение, измените координаты текущего врага
+                    enemy.pos.x -= 0.1
+                    enemy.pos.y -= 0.1
 
         for i in range(len(self.Shots) - 1, -1, -1):
             if self.Shots[i].pos.y > 0:
@@ -101,10 +110,10 @@ class Game:
                     if self.kill_enemy(i):
                         self.count_died_enemies += 1
                         break
-                except:
+                except IndexError:
                     pass
             else:
-                # del self.Shots[i]
+                # Используем метод pop для удаления снарядов
                 self.Shots.pop(i)
                 break
 
@@ -143,6 +152,7 @@ class Game:
                 # Если враг достиг конца экрана, завершаем игру (проигрыш)
                 self.game_over()
 
+
     def kill_enemy(self, shot_index):
         for enemy_index in range(len(self.Enemies) - 1, -1, -1):
             enemy = self.Enemies[enemy_index]
@@ -150,11 +160,12 @@ class Game:
                     self.Shots[shot_index].pos.x <= enemy.pos.x + enemy.size_x and
                     self.Shots[shot_index].pos.y >= enemy.pos.y and
                     self.Shots[shot_index].pos.y <= enemy.pos.y + enemy.size_y):
-                del self.Shots[shot_index]
-                del self.Enemies[enemy_index]
-
+                # Используем метод pop для удаления врагов
+                self.Shots.pop(shot_index)
+                self.Enemies.pop(enemy_index)
 
                 self.count_died_enemies += 1
+                self.score += 1
                 # Создание нового врага Enemy2 после убийства 5 врагов
                 if self.count_died_enemies % 5 == 0:
                     self.count_died_enemies = 0
@@ -164,14 +175,12 @@ class Game:
                     new_enemy2.update(pos_x, pos_y)
                     self.Enemies.append(new_enemy2)
 
-                if self.count_died_enemies % 2 == 0:
-
+                if self.count_died_enemies % 10 == 0:
                     new_enemy3 = Enemy3(self.IMG_ID0, self.WINDOW_W, self.WINDOW_H)
                     pos_x = random.choice(range(0, self.WINDOW_W - new_enemy3.size_x))
                     pos_y = new_enemy3.spawn_y
                     new_enemy3.update(pos_x, pos_y)
                     self.Enemies.append(new_enemy3)
-
 
                 return True
         return False
@@ -193,6 +202,8 @@ class Game:
 
     def draw(self):
         pyxel.cls(0)
+
+        pyxel.text(10, 10, f"Score: {self.score}", 10)
 
         if not self.game_over_flag:
 
@@ -267,6 +278,7 @@ class Game:
         self.count_died_enemies = 0
         self.game_over_color = 8
         self.create_new_enemies()
+        self.score = 0
 
     def create_new_enemies(self):
         for _ in range(5):

@@ -9,15 +9,15 @@ class Enemy3:
         self.img_hero = img_id
         self.size_x = 7
         self.size_y = 8
-        self.speed_y = 0.1
-        self.speed_x = 0.1
+        self.speed_y = 0.2
+        self.speed_x = 0.2
         self.color_tr = 0
         self.get_image_right = Imageposition(40, 0)
         self.get_image = self.get_image_right
         self.spawn_y = -10
         self.WINDOW_W = window_width
         self.WINDOW_H = window_height
-        self.dir_x = 5  # Начальное направление по X
+        self.dir_x = -5  # Начальное направление по X
 
     def update(self, x, y):
         self.pos.x = x
